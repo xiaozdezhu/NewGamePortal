@@ -101,6 +101,8 @@ export namespace ourFirebase {
   // every time this field is updated:
   //  /gamePortal/gamePortalUsers/$myUserId/privateButAddable/matchMemberships
   export function listenToMyMatchesList() {
+    // *listen on the firebase reference /gamePortal/gamePortalUsers/${uid}/privateButAddable/matchMemberships
+    // *with function getMatchMemberships
     checkFunctionIsCalledOnce('listenToMyMatchesList');
     getMatchMembershipsRef().on('value', snap => {
       getMatchMemberships(snap ? snap.val() : {});
@@ -115,9 +117,12 @@ export namespace ourFirebase {
   }
 
   const listeningToMatchIds: string[] = [];
+  // *to store all the matchIds of matches
   const receivedMatches: IdIndexer<MatchInfo> = {};
+  // *to store all the matchId and MatchInfo of matches
 
   function getMatchMemberships(matchMemberships: fbr.MatchMemberships) {
+    // *Get all of the matches in /gamePortal/gamePortalUsers/${uid}/privateButAddable/matchMemberships
     if (!matchMemberships) {
       return;
     }
@@ -125,12 +130,15 @@ export namespace ourFirebase {
     const newMatchIds: string[] = matchIds.filter(
       matchId => listeningToMatchIds.indexOf(matchId) === -1
     );
+    // *add those matchIds which are new to listeningToMatchIds into newMatchIds
+    // *and use function listenToMatch to process each of them
     for (let matchId of newMatchIds) {
       listenToMatch(matchId);
     }
   }
 
   function listenToMatch(matchId: string) {
+    // *this function deals with each of matchId which is new to listeningToMatchIds
     checkCondition(
       'listeningToMatchIds',
       listeningToMatchIds.indexOf(matchId) === -1
@@ -138,6 +146,7 @@ export namespace ourFirebase {
     listeningToMatchIds.push(matchId);
     // let matchInfo = {};
     return getRef('/gamePortal/matches/' + matchId).on('value', snap => {
+      // *use this function to listen on each firebase reference '/gamePortal/matches/' + matchId
       if (!snap) {
         return;
       }
@@ -171,6 +180,9 @@ export namespace ourFirebase {
       if (matches.length === listeningToMatchIds.length) {
         // We got all the matches.
         // Sort by lastUpdatedOn (descending lastUpdatedOn order).
+        // *only when matches.length === listeningToMatchIds.length
+        // *means we have accessed to all the matches whose matchId are in listeningToMatchIds
+        // *and we got non-null value for those matches
         matches.sort((a, b) => b.lastUpdatedOn - a.lastUpdatedOn);
         dispatch({ setMatchesList: matches });
       }

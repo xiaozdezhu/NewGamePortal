@@ -120,6 +120,9 @@ it('addParticipants', done => {
 
 it('fetch match list from firebase', done => {
   const matchId = createMatch().matchId;
+  // *createMatch function add a match whose gameSpecId same to game in firebase reference /gamePortal/matches
+  // *and add this match in /gamePortal/gamePortalUsers/${uid}/privateButAddable/matchMemberships
+  // *and it is listened by ourFirebase.listenToMyMatchesList()
   store.subscribe(() => {
     const matchesList = store.getState().matchesList;
     if (matchesList.find(match => match.matchId === matchId)) {
